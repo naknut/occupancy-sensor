@@ -9,9 +9,7 @@ use crate::sensor::Sensor;
 const POLL_TIME: u64 = 500;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> { 
-    let trigger = Gpio::new()?.get(18)?.into_output();
-    let echo = Gpio::new()?.get(24)?.into_input();
-    let mut sensor = Sensor::new(trigger, echo);
+    let mut sensor = Sensor::new(Gpio::new()?.get(18)?.into_output(), Gpio::new()?.get(24)?.into_input());
 
     loop {
         println!("{}", sensor.is_triggered());

@@ -1,18 +1,19 @@
 use rppal::gpio::{OutputPin, InputPin};
 use std::thread;
 use std::time::{Duration, Instant};
+use std::cell::Cell;
 
 pub struct Sensor {
-    trigger: OutputPin,
+    trigger: Cell<OutputPin>,
     echo: InputPin,
     calibration: u128
 }
 
 impl Sensor {
-    fn echo_time(trigger: &mut OutputPin, echo: &InputPin) -> u128 {
-        trigger.set_high();
+    fn echo_time(trigger: &Cell<OutputPin>, echo: &InputPin) -> u128 {
+        trigger.get_mut().set_high();
         thread::sleep(Duration::from_nanos(10000));
-        trigger.set_low();
+        trigger.get_mut().set_low();
     
         let mut start_time = Instant::now();
         let mut elapsed = start_time.elapsed();
@@ -34,7 +35,8 @@ impl Sensor {
         return measurement < self.calibration / 2 || measurement > self.calibration * 2;
     }
 
-    pub fn new(mut trigger: OutputPin, echo: InputPin) -> Sensor {
+    pub fn new(trigger: OutputPin, echo: InputPin) -> Sensor {
+        let mut trigger = Cell::new(trigger);
         let calibration = Sensor::echo_time(&mut trigger, &echo);
         Sensor {
             trigger: trigger,
