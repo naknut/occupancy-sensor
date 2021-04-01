@@ -10,10 +10,10 @@ pub struct Sensor {
 }
 
 impl Sensor {
-    fn echo_time(trigger: &Cell<OutputPin>, echo: &InputPin) -> u128 {
-        trigger.get_mut().set_high();
+    fn echo_time(trigger: &mut OutputPin, echo: &InputPin) -> u128 {
+        trigger.set_high();
         thread::sleep(Duration::from_nanos(10000));
-        trigger.get_mut().set_low();
+        trigger.set_low();
     
         let mut start_time = Instant::now();
         let mut elapsed = start_time.elapsed();
@@ -30,18 +30,14 @@ impl Sensor {
     }
 
     pub fn is_triggered(&mut self) -> bool {
-        let measurement = Sensor::echo_time(&mut self.trigger, &self.echo);
+        let measurement = Sensor::echo_time(self.trigger.get_mut(), &self.echo);
         println!("Calibration: {}, Measurement: {}", self.calibration, measurement);
         return measurement < self.calibration / 2 || measurement > self.calibration * 2;
     }
 
     pub fn new(trigger: OutputPin, echo: InputPin) -> Sensor {
         let mut trigger = Cell::new(trigger);
-        let calibration = Sensor::echo_time(&mut trigger, &echo);
-        Sensor {
-            trigger: trigger,
-            echo: echo,
-            calibration: calibration
-        }
+        let calibration = Sensor::echo_time(trigger.get_mut(), &echo);
+        Sensor {trigger, echo, calibration}
     }
 }

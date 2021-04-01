@@ -1,5 +1,5 @@
-use rppal::gpio::{Gpio};
-use std::time::{Duration};
+use rppal::gpio::Gpio;
+use std::time::Duration;
 use std::thread;
 
 mod sensor;
